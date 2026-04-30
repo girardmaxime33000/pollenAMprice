@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, claude/polymer-price-tracker-mvp-EVQiU]
+    branches: [main, claude/polymer-price-tracker-mvp-EVQiU, claude/redesign-polymer-index-y9UzR]
 
 permissions:
   contents: read
