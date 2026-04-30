@@ -24,13 +24,6 @@ export async function generateMetadata({
   };
 }
 
-const FAMILY_COLORS: Record<string, string> = {
-  commodity: '#8B949E',
-  engineering: '#7B61FF',
-  recycled: '#26A69A',
-  composite: '#F59E0B',
-};
-
 const SIMILAR: Record<string, string[]> = {
   'pp-homo': ['hdpe', 'petg', 'rpet'],
   hdpe: ['pp-homo', 'petg', 'rpet'],
@@ -52,184 +45,198 @@ export default async function MaterialDetailPage({
   const change1d = getPriceChange(material, 1);
   const change7d = getPriceChange(material, 7);
   const change30d = getPriceChange(material, 30);
-  const textColor = changeTextColor(change1d);
-  const arrow = change1d >= 0 ? '▲' : '▼';
-  const familyColor = FAMILY_COLORS[material.family] ?? '#8B949E';
-  const chartColor = MATERIAL_COLORS[material.slug] ?? '#E07A1F';
-  const compatColor =
-    material.printing3D.compatible === 'yes'
-      ? '#26A69A'
-      : material.printing3D.compatible === 'conditional'
-      ? '#F59E0B'
-      : '#EF5350';
+  const chartColor = MATERIAL_COLORS[material.slug] ?? '#D2691E';
 
   const similarSlugs = SIMILAR[material.slug] ?? [];
   const similarMaterials = similarSlugs.map((s) => getMaterial(s)).filter(Boolean) as typeof materials;
 
+  const specs = [
+    { label: 'Density', value: `${material.density} g/cm³` },
+    { label: 'MFI', value: material.mfi },
+    { label: 'Glass Transition (Tg)', value: material.glassTransition != null ? `${material.glassTransition} °C` : 'N/A' },
+    { label: 'Melt Temperature (Tm)', value: material.meltTemp != null ? `${material.meltTemp} °C` : 'N/A' },
+  ];
+
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto max-w-[1120px] px-8 py-16">
       {/* Breadcrumb */}
-      <nav className="mb-4 flex items-center gap-2 text-xs text-[#8B949E]">
-        <Link href="/" className="hover:text-[#E6EDF3] transition-colors">Home</Link>
+      <nav className="mb-8 flex items-center gap-2 text-xs text-ink-faint">
+        <Link href="/" className="hover:text-ink transition-colors">Home</Link>
         <span>/</span>
-        <Link href="/materials" className="hover:text-[#E6EDF3] transition-colors">Materials</Link>
+        <Link href="/materials" className="hover:text-ink transition-colors">Materials</Link>
         <span>/</span>
-        <span className="text-[#E6EDF3]">{material.name}</span>
+        <span className="text-ink-muted">{material.name}</span>
       </nav>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="font-mono text-3xl font-bold text-[#E6EDF3]">{material.name}</h1>
-            <span
-              className="rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wider"
-              style={{ color: familyColor, backgroundColor: `${familyColor}18` }}
-            >
-              {material.family}
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-[#8B949E]">{material.fullName}</p>
-        </div>
-        <div className="flex flex-col items-start sm:items-end gap-1">
-          <span className="font-mono text-4xl font-bold text-[#E6EDF3]">
+      <div className="mb-10">
+        <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-2">
+          {material.family.toUpperCase()} · PELLET GRADE
+        </p>
+        <h1
+          className="font-serif font-semibold text-ink mb-4"
+          style={{ fontSize: '48px', letterSpacing: '-0.02em' }}
+        >
+          {material.fullName}
+        </h1>
+        <div className="flex items-baseline gap-4 flex-wrap">
+          <span
+            className="font-mono font-medium text-ink tabular"
+            style={{ fontSize: '48px', lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums', fontFeatureSettings: '"tnum"' }}
+          >
             {formatPriceShort(price)}
           </span>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-sm text-[#8B949E]">EUR/kg</span>
-            <span className="font-mono text-lg font-bold" style={{ color: textColor }}>
-              {arrow} {formatPercent(change1d)}
-            </span>
-          </div>
+          <span className="font-mono text-sm text-ink-muted tabular">EUR/kg</span>
+          <span
+            className="font-mono text-xl font-medium tabular"
+            style={{ color: changeTextColor(change1d) }}
+          >
+            {change1d >= 0 ? '+' : ''}{formatPercent(change1d)} 24h
+          </span>
         </div>
       </div>
 
-      {/* Change pills */}
-      <div className="flex items-center gap-3 mb-6 flex-wrap">
+      {/* Change row */}
+      <div className="flex items-center gap-6 mb-10 flex-wrap">
         {[
-          { label: '24h', change: change1d },
-          { label: '7d', change: change7d },
-          { label: '30d', change: change30d },
+          { label: '7 days', change: change7d },
+          { label: '30 days', change: change30d },
         ].map(({ label, change }) => (
-          <div
-            key={label}
-            className="flex items-center gap-2 rounded-lg px-3 py-1.5 border border-[#21262D] bg-[#161B22]"
-          >
-            <span className="text-xs text-[#8B949E]">{label}</span>
-            <span className="font-mono text-sm font-semibold" style={{ color: changeTextColor(change) }}>
-              {formatPercent(change)}
+          <div key={label} className="flex items-baseline gap-2">
+            <span className="text-xs text-ink-faint">{label}</span>
+            <span className="font-mono text-sm font-medium tabular" style={{ color: changeTextColor(change) }}>
+              {change >= 0 ? '+' : ''}{formatPercent(change)}
             </span>
           </div>
         ))}
       </div>
 
       {/* Chart */}
-      <div className="mb-8 rounded-xl border border-[#21262D] bg-[#161B22] p-4">
+      <div className="mb-16 border border-line p-4">
         <ChartWrapper
           data={material.history}
           color={chartColor}
-          type="area"
+          type="line"
           defaultTimeframe="1M"
-          height={320}
+          height={360}
         />
       </div>
 
-      {/* Two-column details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Technical specs */}
-        <div className="rounded-xl border border-[#21262D] bg-[#161B22] p-5">
-          <h2 className="text-sm font-semibold text-[#E6EDF3] mb-4">Technical Specifications</h2>
-          <div className="flex flex-col gap-3">
-            {[
-              { label: 'Density', value: `${material.density} g/cm³` },
-              { label: 'MFI', value: material.mfi },
-              { label: 'Glass Transition (Tg)', value: material.glassTransition != null ? `${material.glassTransition} °C` : 'N/A' },
-              { label: 'Melt Temperature (Tm)', value: material.meltTemp != null ? `${material.meltTemp} °C` : 'N/A' },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex items-center justify-between border-b border-[#21262D] pb-2 last:border-0 last:pb-0">
-                <span className="text-xs text-[#8B949E]">{label}</span>
-                <span className="font-mono text-xs font-medium text-[#E6EDF3]">{value}</span>
+      {/* Two-column: 65/35 */}
+      <div className="flex flex-col lg:flex-row gap-16 mb-16">
+        {/* Left: specs (65%) */}
+        <div className="flex-[65]">
+          <div className="mb-1">
+            <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-2">SPECIFICATIONS</p>
+            <h2
+              className="font-serif font-semibold text-ink border-b border-line pb-4"
+              style={{ fontSize: '28px', letterSpacing: '-0.01em' }}
+            >
+              Technical data
+            </h2>
+          </div>
+          <dl className="mt-0">
+            {specs.map(({ label, value }) => (
+              <div key={label} className="flex items-center justify-between py-4 border-b border-line">
+                <dt className="text-sm text-ink-muted">{label}</dt>
+                <dd className="font-mono text-sm font-medium text-ink tabular">{value}</dd>
               </div>
             ))}
+          </dl>
+
+          <div className="mt-8">
+            <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-4">APPLICATIONS</p>
+            <div className="flex flex-wrap gap-2">
+              {material.applications.map((app) => (
+                <span
+                  key={app}
+                  className="px-3 py-1 text-xs text-ink-muted border border-line"
+                >
+                  {app}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <h3 className="text-sm font-semibold text-[#E6EDF3] mt-5 mb-3">Applications</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {material.applications.map((app) => (
-              <span key={app} className="rounded px-2 py-0.5 text-[10px] bg-[#0B0E14] border border-[#21262D] text-[#8B949E]">
-                {app}
-              </span>
-            ))}
-          </div>
-
-          <h3 className="text-sm font-semibold text-[#E6EDF3] mt-5 mb-3">Major Suppliers</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {material.majorSuppliers.map((s) => (
-              <span key={s} className="rounded px-2 py-0.5 text-[10px] bg-[#0B0E14] border border-[#21262D] text-[#8B949E]">
-                {s}
-              </span>
-            ))}
+          <div className="mt-8">
+            <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-4">MAJOR SUPPLIERS</p>
+            <div className="flex flex-wrap gap-2">
+              {material.majorSuppliers.map((s) => (
+                <span
+                  key={s}
+                  className="px-3 py-1 text-xs text-ink-muted border border-line"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* 3D Printing relevance */}
-        <div className="rounded-xl border border-[#21262D] bg-[#161B22] p-5">
-          <h2 className="text-sm font-semibold text-[#E6EDF3] mb-4">3D Printing Relevance</h2>
-
+        {/* Right: 3D printing callout (35%) */}
+        <div className="flex-[35]">
           <div
-            className="flex items-center gap-2 rounded-lg px-3 py-2 mb-4 border"
-            style={{ borderColor: `${compatColor}40`, backgroundColor: `${compatColor}10` }}
+            className="p-6"
+            style={{ borderLeft: '4px solid #D2691E' }}
           >
-            <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: compatColor }} />
-            <span className="text-sm font-semibold capitalize" style={{ color: compatColor }}>
+            <p className="text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-4">
+              3D PRINTING RELEVANCE
+            </p>
+
+            <p className="text-sm font-medium text-ink mb-1 capitalize">
               {material.printing3D.compatible === 'yes'
-                ? 'Fully Compatible'
+                ? 'Fully compatible'
                 : material.printing3D.compatible === 'conditional'
-                ? 'Conditional Compatibility'
-                : 'Not Compatible'}
-            </span>
+                ? 'Conditional compatibility'
+                : 'Not compatible'}
+            </p>
+
+            <p className="text-sm text-ink-muted leading-relaxed mb-6">
+              {material.printing3D.notes}
+            </p>
+
+            <dl className="flex flex-col gap-0 mb-6">
+              <div className="flex items-center justify-between py-3 border-b border-line">
+                <dt className="text-xs text-ink-faint uppercase tracking-[0.06em]">Nozzle</dt>
+                <dd className="font-mono text-sm text-ink tabular">{material.printing3D.nozzleTemp}</dd>
+              </div>
+              <div className="flex items-center justify-between py-3 border-b border-line">
+                <dt className="text-xs text-ink-faint uppercase tracking-[0.06em]">Bed</dt>
+                <dd className="font-mono text-sm text-ink tabular">{material.printing3D.bedTemp}</dd>
+              </div>
+              <div className="flex items-center justify-between py-3 border-b border-line">
+                <dt className="text-xs text-ink-faint uppercase tracking-[0.06em]">Filament equiv.</dt>
+                <dd className="font-mono text-sm text-down tabular">{material.filamentEquivalentPricePerKg} EUR/kg</dd>
+              </div>
+              <div className="flex items-center justify-between py-3">
+                <dt className="text-xs text-ink-faint uppercase tracking-[0.06em]">Cost advantage</dt>
+                <dd className="font-mono text-sm font-semibold text-accent tabular">
+                  {(material.filamentEquivalentPricePerKg / price).toFixed(1)}× cheaper
+                </dd>
+              </div>
+            </dl>
+
+            <Link
+              href={`/calculator?material=${material.slug}`}
+              className="flex items-center justify-center w-full bg-ink text-bg px-4 py-3 text-sm font-medium hover:bg-black transition-colors duration-150"
+            >
+              Calculate cost for this material
+            </Link>
           </div>
-
-          <p className="text-sm text-[#8B949E] leading-relaxed mb-5">
-            {material.printing3D.notes}
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            <div className="rounded-lg bg-[#0B0E14] border border-[#21262D] p-3">
-              <div className="text-[10px] text-[#8B949E] mb-1">Nozzle Temp</div>
-              <div className="font-mono text-sm font-bold text-[#E6EDF3]">{material.printing3D.nozzleTemp}</div>
-            </div>
-            <div className="rounded-lg bg-[#0B0E14] border border-[#21262D] p-3">
-              <div className="text-[10px] text-[#8B949E] mb-1">Bed Temp</div>
-              <div className="font-mono text-sm font-bold text-[#E6EDF3]">{material.printing3D.bedTemp}</div>
-            </div>
-          </div>
-
-          <div className="rounded-lg bg-[#0B0E14] border border-[#21262D] p-3 mb-5">
-            <div className="text-[10px] text-[#8B949E] mb-1">Filament equivalent price</div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-mono text-xl font-bold text-[#EF5350]">{material.filamentEquivalentPricePerKg} EUR/kg</span>
-              <span className="text-[10px] text-[#8B949E]">vs pellet {formatPriceShort(price)} EUR/kg</span>
-            </div>
-            <div className="mt-1 font-mono text-xs text-[#E07A1F] font-semibold">
-              {(material.filamentEquivalentPricePerKg / price).toFixed(1)}× cost advantage with pellets
-            </div>
-          </div>
-
-          <Link
-            href={`/calculator?material=${material.slug}`}
-            className="flex items-center justify-center gap-2 w-full rounded-lg bg-[#E07A1F] hover:bg-[#C96E1A] px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-150"
-          >
-            Calculate cost for this material →
-          </Link>
         </div>
       </div>
 
-      {/* Similar materials */}
+      {/* Related materials */}
       {similarMaterials.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-[#E6EDF3] mb-3">Related Materials</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-2">RELATED</p>
+          <h2
+            className="font-serif font-semibold text-ink border-b border-line pb-4 mb-0"
+            style={{ fontSize: '22px', letterSpacing: '-0.01em' }}
+          >
+            Similar materials
+          </h2>
+          <div className="flex flex-col">
             {similarMaterials.map((m) => {
               const p = getLatestPrice(m);
               const c = getPriceChange(m, 1);
@@ -237,17 +244,17 @@ export default async function MaterialDetailPage({
                 <Link
                   key={m.slug}
                   href={`/materials/${m.slug}`}
-                  className="flex items-center justify-between p-3 rounded-lg bg-[#161B22] border border-[#21262D] hover:border-[#E07A1F]/40 transition-colors"
+                  className="flex items-center justify-between py-4 border-b border-line hover:bg-[#F2F2EE] transition-colors duration-150"
                 >
                   <div>
-                    <div className="font-mono text-sm font-bold text-[#E6EDF3]">{m.name}</div>
-                    <div className="text-[10px] text-[#8B949E]">{m.fullName}</div>
+                    <span className="font-mono text-sm font-semibold tracking-[0.04em] text-ink uppercase tabular">{m.name}</span>
+                    <span className="ml-3 text-sm text-ink-muted">{m.fullName}</span>
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono text-sm text-[#E6EDF3]">{formatPriceShort(p)}</div>
-                    <div className="font-mono text-xs" style={{ color: changeTextColor(c) }}>
-                      {formatPercent(c)}
-                    </div>
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-mono text-sm text-ink tabular">{formatPriceShort(p)}</span>
+                    <span className="font-mono text-sm tabular" style={{ color: changeTextColor(c) }}>
+                      {c >= 0 ? '+' : ''}{formatPercent(c)}
+                    </span>
                   </div>
                 </Link>
               );

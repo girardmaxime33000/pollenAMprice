@@ -9,11 +9,10 @@ export const metadata: Metadata = {
   description: 'Live pellet prices for PP Homo, HDPE, PA6, PETG, and rPET — tracked daily for industrial 3D printing.',
 };
 
-const FAMILY_COLORS: Record<string, string> = {
-  commodity: '#8B949E',
-  engineering: '#7B61FF',
-  recycled: '#26A69A',
-  composite: '#F59E0B',
+const COMPAT_COLOR: Record<string, string> = {
+  yes: '#2F6F4E',
+  conditional: '#8B6914',
+  no: '#B5503C',
 };
 
 export default function MaterialsPage() {
@@ -27,135 +26,117 @@ export default function MaterialsPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="mx-auto max-w-[1120px] px-8 py-16">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#E6EDF3]">Polymer Materials</h1>
-        <p className="mt-1 text-sm text-[#8B949E]">
+      <div className="mb-12">
+        <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-1">
+          POLYMER MATERIALS
+        </p>
+        <h1
+          className="font-serif font-semibold text-ink"
+          style={{ fontSize: '48px', letterSpacing: '-0.02em' }}
+        >
+          Market prices
+        </h1>
+        <p className="mt-3 text-base text-ink-muted max-w-xl">
           Daily spot prices for industrial pellet grades — tracked for FFF and pellet extrusion 3D printing.
         </p>
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-[#21262D] bg-[#161B22] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[#21262D]">
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#8B949E] uppercase tracking-wider">Symbol</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#8B949E] uppercase tracking-wider">Name</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-[#8B949E] uppercase tracking-wider">Family</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider">Price</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider">24h %</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider">7d %</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider">30d %</th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider">1Y %</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[#8B949E] uppercase tracking-wider">3D Print</th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-[#8B949E] uppercase tracking-wider"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#21262D]">
-              {rows.map(({ material, price, change1d, change7d, change30d, change365d }) => {
-                const familyColor = FAMILY_COLORS[material.family] ?? '#8B949E';
-                const compatColor =
-                  material.printing3D.compatible === 'yes'
-                    ? '#26A69A'
-                    : material.printing3D.compatible === 'conditional'
-                    ? '#F59E0B'
-                    : '#EF5350';
-
-                return (
-                  <tr
-                    key={material.slug}
-                    className="hover:bg-[#0B0E14]/60 transition-colors group"
-                  >
-                    <td className="px-4 py-3">
-                      <Link href={`/materials/${material.slug}`} className="font-mono text-sm font-bold text-[#E6EDF3] hover:text-[#E07A1F] transition-colors">
-                        {material.name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-[#8B949E]">{material.fullName}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider"
-                        style={{ color: familyColor, backgroundColor: `${familyColor}18` }}
-                      >
-                        {material.family}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <span className="font-mono text-sm font-semibold text-[#E6EDF3]">
-                        {formatPriceShort(price)}
-                      </span>
-                    </td>
-                    {[change1d, change7d, change30d, change365d].map((change, i) => (
-                      <td key={i} className="px-4 py-3 text-right">
-                        <span className="font-mono text-xs font-semibold" style={{ color: changeTextColor(change) }}>
-                          {formatPercent(change)}
-                        </span>
-                      </td>
-                    ))}
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className="inline-block rounded px-2 py-0.5 text-[10px] font-medium"
-                        style={{ color: compatColor, backgroundColor: `${compatColor}18` }}
-                      >
-                        {material.printing3D.compatible}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <Link
-                        href={`/materials/${material.slug}`}
-                        className="text-[10px] font-medium text-[#8B949E] hover:text-[#E07A1F] transition-colors"
-                        aria-label={`View ${material.name} details`}
-                      >
-                        View →
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr style={{ borderBottom: '1px solid #1A1A1A' }}>
+              <th className="pb-3 text-left text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint">Symbol</th>
+              <th className="pb-3 text-left text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint">Name</th>
+              <th className="pb-3 text-left text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint hidden sm:table-cell">Family</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint">Price</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint">24h</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint hidden md:table-cell">7d</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint hidden md:table-cell">30d</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint hidden lg:table-cell">1Y</th>
+              <th className="pb-3 text-center text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint hidden sm:table-cell">3D Print</th>
+              <th className="pb-3" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ material, price, change1d, change7d, change30d, change365d }) => {
+              const compatColor = COMPAT_COLOR[material.printing3D.compatible] ?? '#A8A8A0';
+              return (
+                <tr
+                  key={material.slug}
+                  className="border-b border-line hover:bg-[#F2F2EE] transition-colors duration-150"
+                >
+                  <td className="py-4 pr-4">
+                    <Link
+                      href={`/materials/${material.slug}`}
+                      className="font-mono text-sm font-semibold tracking-[0.04em] text-ink hover:text-accent transition-colors duration-150 uppercase tabular"
+                    >
+                      {material.name}
+                    </Link>
+                  </td>
+                  <td className="py-4 pr-4 text-sm text-ink-muted">{material.fullName}</td>
+                  <td className="py-4 pr-4 hidden sm:table-cell">
+                    <span className="text-xs text-ink-faint capitalize">{material.family}</span>
+                  </td>
+                  <td className="py-4 text-right">
+                    <span className="font-mono text-sm text-ink tabular">{formatPriceShort(price)}</span>
+                  </td>
+                  <td className="py-4 text-right">
+                    <span className="font-mono text-sm tabular" style={{ color: changeTextColor(change1d) }}>
+                      {formatPercent(change1d)}
+                    </span>
+                  </td>
+                  <td className="py-4 text-right hidden md:table-cell">
+                    <span className="font-mono text-sm tabular" style={{ color: changeTextColor(change7d) }}>
+                      {formatPercent(change7d)}
+                    </span>
+                  </td>
+                  <td className="py-4 text-right hidden md:table-cell">
+                    <span className="font-mono text-sm tabular" style={{ color: changeTextColor(change30d) }}>
+                      {formatPercent(change30d)}
+                    </span>
+                  </td>
+                  <td className="py-4 text-right hidden lg:table-cell">
+                    <span className="font-mono text-sm tabular" style={{ color: changeTextColor(change365d) }}>
+                      {formatPercent(change365d)}
+                    </span>
+                  </td>
+                  <td className="py-4 text-center hidden sm:table-cell">
+                    <span className="text-xs font-medium capitalize" style={{ color: compatColor }}>
+                      {material.printing3D.compatible}
+                    </span>
+                  </td>
+                  <td className="py-4 pl-4 text-right">
+                    <Link
+                      href={`/materials/${material.slug}`}
+                      className="text-xs text-ink-faint hover:text-ink transition-colors duration-150"
+                    >
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
-      {/* Grid below */}
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {materials.map((m) => (
-          <Link
-            key={m.slug}
-            href={`/materials/${m.slug}`}
-            className="flex flex-col gap-3 p-4 rounded-xl bg-[#161B22] border border-[#21262D] hover:border-[#E07A1F]/40 transition-all duration-150 group"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="font-mono text-base font-bold text-[#E6EDF3] group-hover:text-white">
-                  {m.name}
-                </span>
-                <p className="text-[11px] text-[#8B949E]">{m.fullName}</p>
-              </div>
-              <span
-                className="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider"
-                style={{ color: FAMILY_COLORS[m.family], backgroundColor: `${FAMILY_COLORS[m.family]}18` }}
-              >
-                {m.family}
-              </span>
-            </div>
-            <div className="flex items-end justify-between">
-              <div>
-                <div className="font-mono text-xl font-bold text-[#E6EDF3]">{formatPriceShort(getLatestPrice(m))}</div>
-                <div className="text-[10px] text-[#8B949E] font-mono">EUR/kg</div>
-              </div>
-              <span
-                className="font-mono text-sm font-semibold"
-                style={{ color: changeTextColor(getPriceChange(m, 1)) }}
-              >
-                {formatPercent(getPriceChange(m, 1))}
-              </span>
-            </div>
-          </Link>
-        ))}
+      {/* CTA */}
+      <div className="mt-16 pt-8 border-t border-line flex items-center gap-6">
+        <Link
+          href="/compare"
+          className="bg-ink text-bg px-5 py-3 text-sm font-medium hover:bg-black transition-colors duration-150"
+        >
+          Compare materials
+        </Link>
+        <Link
+          href="/calculator"
+          className="text-sm text-ink-muted hover:text-ink transition-colors duration-150 underline-offset-2 hover:underline"
+        >
+          Cost calculator
+        </Link>
       </div>
     </div>
   );
