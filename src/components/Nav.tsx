@@ -15,58 +15,51 @@ export default function Nav() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
-  // Close on route change
   useEffect(() => { setOpen(false) }, [pathname])
 
-  // Prevent body scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [open])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#21262D] bg-[#0B0E14]/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Left: Wordmark */}
-        <Link href="/" className="flex flex-col items-start group">
-          <span className="font-mono text-sm font-bold tracking-[0.2em] uppercase text-[#E6EDF3] group-hover:text-white transition-colors">
+    <header className="sticky top-0 z-50 w-full border-b border-line bg-bg">
+      <div className="mx-auto flex h-14 max-w-[1120px] items-center justify-between px-8">
+        {/* Wordmark */}
+        <Link href="/" className="flex flex-col items-start">
+          <span className="font-mono text-xs font-600 tracking-[0.15em] uppercase text-ink">
             POLYMER INDEX
           </span>
-          <span className="mt-0.5 h-px w-full bg-[#E07A1F]" aria-hidden="true" />
+          <span className="mt-0.5 h-px w-full bg-accent" aria-hidden="true" />
         </Link>
 
-        {/* Center: Nav links (desktop) */}
-        <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+        {/* Nav links desktop */}
+        <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="relative px-3 py-1.5 text-sm font-medium text-[#8B949E] hover:text-[#E6EDF3] transition-colors duration-150 rounded-md hover:bg-[#161B22] group"
+              className="text-sm text-ink-muted hover:text-ink transition-colors duration-150"
             >
               {link.label}
-              <span
-                className="absolute bottom-0 left-3 right-3 h-px bg-[#E07A1F] scale-x-0 group-hover:scale-x-100 transition-transform duration-200 origin-left"
-                aria-hidden="true"
-              />
             </Link>
           ))}
         </nav>
 
-        {/* Right: badge + burger */}
-        <div className="flex items-center gap-3">
+        {/* Right: Pollen AM link + burger */}
+        <div className="flex items-center gap-4">
           <a
             href="https://pollen.am"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[#E07A1F]/30 bg-[#E07A1F]/10 px-3 py-1 text-xs font-medium text-[#E07A1F] hover:bg-[#E07A1F]/20 hover:border-[#E07A1F]/50 transition-colors duration-150"
+            className="hidden sm:inline text-xs text-ink-muted hover:text-ink transition-colors duration-150 underline-offset-2 hover:underline"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#E07A1F]" aria-hidden="true" />
-            Powered by Pollen AM
+            Pollen AM
           </a>
 
           <button
             onClick={() => setOpen((v) => !v)}
-            className="md:hidden flex items-center justify-center w-8 h-8 rounded-md text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#161B22] transition-colors"
+            className="md:hidden flex items-center justify-center w-8 h-8 text-ink-muted hover:text-ink transition-colors"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
             aria-controls="mobile-menu"
@@ -84,33 +77,27 @@ export default function Nav() {
         </div>
       </div>
 
-      {/* Mobile menu panel */}
+      {/* Mobile menu */}
       {open && (
-        <div
-          id="mobile-menu"
-          className="md:hidden border-t border-[#21262D] bg-[#0B0E14]"
-        >
-          <nav className="flex flex-col px-4 py-3 gap-1" aria-label="Mobile navigation">
+        <div id="mobile-menu" className="md:hidden border-t border-line bg-bg">
+          <nav className="flex flex-col px-8 py-4 gap-0" aria-label="Mobile navigation">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex items-center px-3 py-2.5 text-sm font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#161B22] rounded-md transition-colors duration-150"
+                className="py-3 text-sm text-ink-muted hover:text-ink border-b border-line last:border-0 transition-colors duration-150"
               >
                 {link.label}
               </Link>
             ))}
-            <div className="mt-3 pt-3 border-t border-[#21262D]">
-              <a
-                href="https://pollen.am"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#E07A1F]/30 bg-[#E07A1F]/10 px-3 py-1 text-xs font-medium text-[#E07A1F]"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-[#E07A1F]" aria-hidden="true" />
-                Powered by Pollen AM
-              </a>
-            </div>
+            <a
+              href="https://pollen.am"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pt-4 text-xs text-ink-muted hover:text-ink transition-colors duration-150"
+            >
+              Pollen AM ↗
+            </a>
           </nav>
         </div>
       )}

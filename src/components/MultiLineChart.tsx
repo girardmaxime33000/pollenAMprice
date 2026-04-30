@@ -50,21 +50,21 @@ export default function MultiLineChart({ series, height = 340 }: Props) {
         height,
         layout: {
           background: { type: ColorType.Solid, color: 'transparent' },
-          textColor: COLORS.textSecondary,
+          textColor: COLORS.inkFaint,
           fontFamily: 'JetBrains Mono, monospace',
           fontSize: 11,
         },
         grid: {
-          vertLines: { color: COLORS.border, style: LineStyle.Dotted },
-          horzLines: { color: COLORS.border, style: LineStyle.Dotted },
+          vertLines: { visible: false },
+          horzLines: { color: COLORS.border, style: LineStyle.Solid },
         },
         crosshair: {
-          vertLine: { color: COLORS.textSecondary, width: 1, style: LineStyle.Dashed, labelBackgroundColor: COLORS.surface },
-          horzLine: { color: COLORS.textSecondary, width: 1, style: LineStyle.Dashed, labelBackgroundColor: COLORS.surface },
+          vertLine: { color: COLORS.inkFaint, width: 1, style: LineStyle.Dashed, labelBackgroundColor: COLORS.ink },
+          horzLine: { color: COLORS.inkFaint, width: 1, style: LineStyle.Dashed, labelBackgroundColor: COLORS.ink },
         },
         rightPriceScale: {
           borderColor: COLORS.border,
-          textColor: COLORS.textSecondary,
+          textColor: COLORS.inkFaint,
         },
         timeScale: { borderColor: COLORS.border },
         handleScroll: true,
@@ -74,10 +74,10 @@ export default function MultiLineChart({ series, height = 340 }: Props) {
       seriesMapRef.current.clear();
 
       for (const s of series) {
-        const color = MATERIAL_COLORS[s.slug] ?? '#8B949E';
+        const color = MATERIAL_COLORS[s.slug] ?? COLORS.inkFaint;
         const lineSeries = chart.addLineSeries({
           color,
-          lineWidth: 2,
+          lineWidth: s.slug === 'pp-homo' ? 2 : 1,
           priceLineVisible: false,
           crosshairMarkerVisible: true,
           crosshairMarkerRadius: 4,
@@ -128,20 +128,22 @@ export default function MultiLineChart({ series, height = 340 }: Props) {
   }, [activeTimeframe, series]);
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-1">
-        {timeframes.map((tf) => (
-          <button
-            key={tf}
-            onClick={() => setActiveTimeframe(tf)}
-            className={`px-2.5 py-1 rounded text-xs font-mono font-medium transition-colors ${
-              activeTimeframe === tf
-                ? 'bg-[#E07A1F] text-white'
-                : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#161B22]'
-            }`}
-          >
-            {tf}
-          </button>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-0 text-xs font-mono text-ink-faint">
+        {timeframes.map((tf, i) => (
+          <span key={tf} className="flex items-center">
+            {i > 0 && <span className="px-1.5 select-none">·</span>}
+            <button
+              onClick={() => setActiveTimeframe(tf)}
+              className={`transition-colors duration-150 ${
+                activeTimeframe === tf
+                  ? 'font-semibold text-ink border-b border-accent'
+                  : 'hover:text-ink-muted'
+              }`}
+            >
+              {tf}
+            </button>
+          </span>
         ))}
       </div>
       <div ref={containerRef} style={{ height }} className="w-full" />
