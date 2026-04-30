@@ -1,36 +1,38 @@
 export const COLORS = {
-  background: '#0B0E14',
-  surface: '#161B22',
-  border: '#21262D',
-  accent: '#E07A1F',
-  up: '#26A69A',
-  down: '#EF5350',
-  textPrimary: '#E6EDF3',
-  textSecondary: '#8B949E',
+  background: '#FAFAF7',
+  surface: '#FAFAF7',
+  surfaceRaised: '#FFFFFF',
+  border: '#E5E5E0',
+  borderStrong: '#1A1A1A',
+  accent: '#D2691E',
+  up: '#2F6F4E',
+  down: '#B5503C',
+  ink: '#1A1A1A',
+  inkMuted: '#6E6E68',
+  inkFaint: '#A8A8A0',
 } as const;
 
-// Material line colours for comparator chart
+// Greyscale palette for multi-line comparator chart
 export const MATERIAL_COLORS: Record<string, string> = {
-  'pp-homo': '#E07A1F',
-  hdpe: '#26A69A',
-  pa6: '#7B61FF',
-  petg: '#F59E0B',
-  rpet: '#34D399',
+  'pp-homo': '#D2691E', // accent — highlighted series
+  hdpe: '#1A1A1A',
+  pa6: '#6E6E68',
+  petg: '#A8A8A0',
+  rpet: '#2F6F4E',
 };
 
-// Heatmap interpolation: given a percent change, return a bg colour
 export function heatmapColor(change: number): string {
-  if (change >= 0.03) return 'rgba(38,166,154,0.35)';
-  if (change >= 0.015) return 'rgba(38,166,154,0.20)';
-  if (change >= 0.005) return 'rgba(38,166,154,0.10)';
-  if (change >= -0.005) return 'rgba(139,148,158,0.12)';
-  if (change >= -0.015) return 'rgba(239,83,80,0.10)';
-  if (change >= -0.03) return 'rgba(239,83,80,0.20)';
-  return 'rgba(239,83,80,0.35)';
+  if (change >= 0.03) return 'rgba(47,111,78,0.08)';
+  if (change >= 0.015) return 'rgba(47,111,78,0.05)';
+  if (change >= 0.005) return 'rgba(47,111,78,0.03)';
+  if (change >= -0.005) return 'transparent';
+  if (change >= -0.015) return 'rgba(181,80,60,0.03)';
+  if (change >= -0.03) return 'rgba(181,80,60,0.05)';
+  return 'rgba(181,80,60,0.08)';
 }
 
 export function changeTextColor(change: number): string {
-  if (change > 0) return '#26A69A';
-  if (change < 0) return '#EF5350';
-  return '#8B949E';
+  if (change > 0) return '#2F6F4E';
+  if (change < 0) return '#B5503C';
+  return '#A8A8A0';
 }

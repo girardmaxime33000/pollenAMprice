@@ -15,12 +15,10 @@ const TIMEFRAME_DAYS: Record<TimeframeKey, number | null> = {
   All: null,
 };
 
-type ChartType = 'area' | 'line';
-
 type Props = {
   data: PricePoint[];
   color?: string;
-  type?: ChartType;
+  type?: 'area' | 'line';
   defaultTimeframe?: TimeframeKey;
   showTimeframes?: boolean;
   height?: number;
@@ -29,7 +27,6 @@ type Props = {
 export default function PriceChart({
   data,
   color = COLORS.accent,
-  type = 'area',
   defaultTimeframe = '1M',
   showTimeframes = true,
   height = 300,
@@ -49,12 +46,10 @@ export default function PriceChart({
 
   useEffect(() => {
     if (!containerRef.current) return;
-
     let destroyed = false;
 
     import('lightweight-charts').then((module) => {
       if (destroyed || !containerRef.current) return;
-
       const { createChart, ColorType, LineStyle } = module;
 
       const chart = createChart(containerRef.current, {
@@ -62,21 +57,21 @@ export default function PriceChart({
         height,
         layout: {
           background: { type: ColorType.Solid, color: 'transparent' },
-          textColor: COLORS.textSecondary,
+          textColor: COLORS.inkFaint,
           fontFamily: 'JetBrains Mono, monospace',
           fontSize: 11,
         },
         grid: {
-          vertLines: { color: COLORS.border, style: LineStyle.Dotted },
-          horzLines: { color: COLORS.border, style: LineStyle.Dotted },
+          vertLines: { visible: false },
+          horzLines: { color: COLORS.border, style: LineStyle.Solid },
         },
         crosshair: {
-          vertLine: { color: COLORS.textSecondary, width: 1, style: LineStyle.Dashed, labelBackgroundColor: COLORS.surface },
-          horzLine: { color: COLORS.textSecondary, width: 1, style: LineStyle.Dashed, labelBackgroundColor: COLORS.surface },
+          vertLine: { color: COLORS.inkFaint, width: 1, style: LineStyle.Dashed, labelBackgroundColor: COLORS.ink },
+          horzLine: { color: COLORS.inkFaint, width: 1, style: LineStyle.Dashed, labelBackgroundColor: COLORS.ink },
         },
         rightPriceScale: {
           borderColor: COLORS.border,
-          textColor: COLORS.textSecondary,
+          textColor: COLORS.inkFaint,
         },
         timeScale: {
           borderColor: COLORS.border,
@@ -87,45 +82,23 @@ export default function PriceChart({
         handleScale: true,
       });
 
-      let series: unknown;
-
-      if (type === 'area') {
-        const areaSeries = chart.addAreaSeries({
-          lineColor: color,
-          topColor: `${color}40`,
-          bottomColor: `${color}05`,
-          lineWidth: 2,
-          priceLineVisible: true,
-          priceLineColor: `${color}80`,
-          crosshairMarkerVisible: true,
-          crosshairMarkerRadius: 4,
-          crosshairMarkerBackgroundColor: color,
-        });
-        series = areaSeries;
-      } else {
-        const lineSeries = chart.addLineSeries({
-          color,
-          lineWidth: 2,
-          priceLineVisible: true,
-          priceLineColor: `${color}80`,
-          crosshairMarkerVisible: true,
-          crosshairMarkerRadius: 4,
-          crosshairMarkerBackgroundColor: color,
-        });
-        series = lineSeries;
-      }
+      const lineSeries = chart.addLineSeries({
+        color,
+        lineWidth: 2,
+        priceLineVisible: false,
+        crosshairMarkerVisible: true,
+        crosshairMarkerRadius: 4,
+        crosshairMarkerBackgroundColor: color,
+      });
 
       const filtered = getFilteredData(activeTimeframe);
-      const chartData = filtered.map((p) => ({
-        time: p.date as import('lightweight-charts').Time,
-        value: p.price,
-      }));
-
-      (series as { setData: (d: unknown[]) => void }).setData(chartData);
+      lineSeries.setData(
+        filtered.map((p) => ({ time: p.date as import('lightweight-charts').Time, value: p.price }))
+      );
       chart.timeScale().fitContent();
 
       chartRef.current = chart;
-      seriesRef.current = series;
+      seriesRef.current = lineSeries;
 
       const resizeObserver = new ResizeObserver(() => {
         if (containerRef.current && !destroyed) {
@@ -134,9 +107,7 @@ export default function PriceChart({
       });
       resizeObserver.observe(containerRef.current);
 
-      return () => {
-        resizeObserver.disconnect();
-      };
+      return () => resizeObserver.disconnect();
     });
 
     return () => {
@@ -153,31 +124,31 @@ export default function PriceChart({
   useEffect(() => {
     if (!seriesRef.current || !chartRef.current) return;
     const filtered = getFilteredData(activeTimeframe);
-    const chartData = filtered.map((p) => ({
-      time: p.date as import('lightweight-charts').Time,
-      value: p.price,
-    }));
-    (seriesRef.current as { setData: (d: unknown[]) => void }).setData(chartData);
+    (seriesRef.current as { setData: (d: unknown[]) => void }).setData(
+      filtered.map((p) => ({ time: p.date as import('lightweight-charts').Time, value: p.price }))
+    );
     (chartRef.current as { timeScale: () => { fitContent: () => void } }).timeScale().fitContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTimeframe, data]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {showTimeframes && (
-        <div className="flex items-center gap-1">
-          {timeframes.map((tf) => (
-            <button
-              key={tf}
-              onClick={() => setActiveTimeframe(tf)}
-              className={`px-2.5 py-1 rounded text-xs font-mono font-medium transition-colors ${
-                activeTimeframe === tf
-                  ? 'bg-[#E07A1F] text-white'
-                  : 'text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#161B22]'
-              }`}
-            >
-              {tf}
-            </button>
+        <div className="flex items-center gap-0 text-xs font-mono text-ink-faint">
+          {timeframes.map((tf, i) => (
+            <span key={tf} className="flex items-center">
+              {i > 0 && <span className="px-1.5 select-none">·</span>}
+              <button
+                onClick={() => setActiveTimeframe(tf)}
+                className={`transition-colors duration-150 ${
+                  activeTimeframe === tf
+                    ? 'font-semibold text-ink border-b border-accent'
+                    : 'hover:text-ink-muted'
+                }`}
+              >
+                {tf}
+              </button>
+            </span>
           ))}
         </div>
       )}

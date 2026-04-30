@@ -15,21 +15,10 @@ export const metadata: Metadata = {
     'Live polymer pellet prices for PP, HDPE, PA6, PETG, and rPET. The reference index for industrial 3D printing material costs — powered by Pollen AM.',
 };
 
-const FAMILY_COLORS: Record<string, string> = {
-  commodity: '#8B949E',
-  engineering: '#7B61FF',
-  recycled: '#26A69A',
-  composite: '#F59E0B',
-};
-
 export default function HomePage() {
   const ppiLatest = getLatestPPI();
-  const ppiChange1d = getPPIChange(1);
-  const ppiChange7d = getPPIChange(7);
   const ppiChange30d = getPPIChange(30);
   const ppiHistory = getPPIHistory();
-
-  // Convert PPI history to PricePoint format for the chart
   const ppiChartData = ppiHistory.map((p) => ({ date: p.date, price: p.value }));
 
   const topMovers = materials
@@ -44,208 +33,201 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Ticker bar */}
+      {/* Hero PPI block */}
+      <section className="mx-auto max-w-[1120px] px-8 pt-24 pb-12">
+        <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-4">
+          POLLEN POLYMER INDEX · APRIL 2026
+        </p>
+        <h1
+          className="font-serif font-semibold text-ink leading-tight mb-6"
+          style={{ fontSize: '48px', letterSpacing: '-0.02em' }}
+        >
+          Tracking the European polymer market
+        </h1>
+        <div className="flex items-baseline gap-4 flex-wrap">
+          <span
+            className="font-mono font-medium text-ink tabular"
+            style={{ fontSize: '64px', lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums', fontFeatureSettings: '"tnum"' }}
+          >
+            {ppiLatest.value.toFixed(3)}
+          </span>
+          <span className="text-base font-serif text-ink-muted">
+            {ppiChange30d >= 0 ? 'up' : 'down'}{' '}
+            <span style={{ color: changeTextColor(ppiChange30d) }}>
+              {Math.abs(ppiChange30d * 100).toFixed(1)}%
+            </span>{' '}
+            over the past 30 days
+          </span>
+        </div>
+        <p className="mt-2 text-sm text-ink-faint font-mono">EUR/kg weighted average · Updated daily</p>
+      </section>
+
+      {/* PPI Chart */}
+      <section className="mx-auto max-w-[1120px] px-8 pb-16">
+        <ChartWrapper
+          data={ppiChartData}
+          color="#D2691E"
+          type="line"
+          defaultTimeframe="1Y"
+          height={320}
+        />
+      </section>
+
+      {/* Ticker bar (after hero) */}
       <TickerWrapper />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10">
-        {/* Hero: PPI chart */}
-        <section>
-          <div className="mb-4">
-            <div className="flex items-start justify-between flex-wrap gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-[#E6EDF3]">Pollen Polymer Index</h1>
-                <p className="text-sm text-[#8B949E] mt-0.5">
-                  Weighted composite of 5 polymer pellet grades · Updated daily
-                </p>
-              </div>
-              <Link
-                href="/compare"
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-[#21262D] bg-[#161B22] px-3 py-1.5 text-xs font-medium text-[#8B949E] hover:text-[#E6EDF3] hover:border-[#E07A1F]/40 transition-colors"
-              >
-                Compare materials →
-              </Link>
-            </div>
+      {/* Heatmap */}
+      <section className="mx-auto max-w-[1120px] px-8 py-16">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-1">
+              24-HOUR PERFORMANCE
+            </p>
+            <h2
+              className="font-serif font-semibold text-ink"
+              style={{ fontSize: '28px', letterSpacing: '-0.01em' }}
+            >
+              Market snapshot
+            </h2>
+          </div>
+          <Link href="/materials" className="text-sm text-ink-muted hover:text-ink transition-colors duration-150 underline-offset-2 hover:underline">
+            All materials
+          </Link>
+        </div>
+        <Heatmap />
+      </section>
 
-            {/* PPI headline numbers */}
-            <div className="mt-4 flex items-center gap-6 flex-wrap">
-              <div className="flex flex-col gap-0.5">
-                <span className="font-mono text-4xl font-bold text-[#E6EDF3]">
-                  {ppiLatest.value.toFixed(3)}
-                </span>
-                <span className="text-xs text-[#8B949E] font-mono">EUR/kg (weighted avg)</span>
-              </div>
-              {[
-                { label: '24h', change: ppiChange1d },
-                { label: '7d', change: ppiChange7d },
-                { label: '30d', change: ppiChange30d },
-              ].map(({ label, change }) => (
-                <div key={label} className="flex flex-col items-center gap-0.5">
-                  <span
-                    className="font-mono text-xl font-bold"
-                    style={{ color: changeTextColor(change) }}
+      {/* Top movers table */}
+      <section className="mx-auto max-w-[1120px] px-8 pb-24">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-1">
+              MARKET OVERVIEW
+            </p>
+            <h2
+              className="font-serif font-semibold text-ink"
+              style={{ fontSize: '28px', letterSpacing: '-0.01em' }}
+            >
+              Top movers
+            </h2>
+          </div>
+          <Link href="/materials" className="text-sm text-ink-muted hover:text-ink transition-colors duration-150 underline-offset-2 hover:underline">
+            Full table
+          </Link>
+        </div>
+
+        <table className="w-full">
+          <thead>
+            <tr style={{ borderBottom: '1px solid #1A1A1A' }}>
+              <th className="pb-3 text-left text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint">Symbol</th>
+              <th className="pb-3 text-left text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint hidden sm:table-cell">Name</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint">Price</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint">24h</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint hidden md:table-cell">7d</th>
+              <th className="pb-3 text-right text-[11px] font-sans font-medium uppercase tracking-[0.08em] text-ink-faint hidden md:table-cell">30d</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topMovers.map(({ material, price, change1d, change7d, change30d }) => (
+              <tr
+                key={material.slug}
+                className="border-b border-line hover:bg-[#F2F2EE] transition-colors duration-150"
+              >
+                <td className="py-4 pr-4">
+                  <Link
+                    href={`/materials/${material.slug}`}
+                    className="font-mono text-sm font-semibold tracking-[0.04em] text-ink hover:text-accent transition-colors duration-150 uppercase tabular"
                   >
-                    {formatPercent(change)}
+                    {material.name}
+                  </Link>
+                </td>
+                <td className="py-4 pr-4 hidden sm:table-cell">
+                  <span className="text-sm text-ink-muted">{material.fullName}</span>
+                </td>
+                <td className="py-4 text-right">
+                  <span className="font-mono text-sm text-ink tabular">{formatPriceShort(price)}</span>
+                </td>
+                <td className="py-4 text-right">
+                  <span className="font-mono text-sm font-medium tabular" style={{ color: changeTextColor(change1d) }}>
+                    {formatPercent(change1d)}
                   </span>
-                  <span className="text-[10px] text-[#8B949E]">{label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-[#21262D] bg-[#161B22] p-4">
-            <ChartWrapper
-              data={ppiChartData}
-              color="#E07A1F"
-              type="area"
-              defaultTimeframe="1Y"
-              height={280}
-            />
-          </div>
-        </section>
-
-        {/* Heatmap */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-[#E6EDF3]">24h Performance</h2>
-            <Link href="/materials" className="text-xs text-[#8B949E] hover:text-[#E07A1F] transition-colors">
-              All materials →
-            </Link>
-          </div>
-          <Heatmap />
-        </section>
-
-        {/* Top movers table */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-[#E6EDF3]">Market Overview</h2>
-            <Link href="/materials" className="text-xs text-[#8B949E] hover:text-[#E07A1F] transition-colors">
-              Full table →
-            </Link>
-          </div>
-          <div className="rounded-xl border border-[#21262D] bg-[#161B22] overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#21262D]">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#8B949E] uppercase tracking-wider">Symbol</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#8B949E] uppercase tracking-wider hidden sm:table-cell">Family</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider">Price</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider">24h %</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider hidden md:table-cell">7d %</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-[#8B949E] uppercase tracking-wider hidden md:table-cell">30d %</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#21262D]">
-                {topMovers.map(({ material, price, change1d, change7d, change30d }) => {
-                  const familyColor = FAMILY_COLORS[material.family] ?? '#8B949E';
-                  return (
-                    <tr key={material.slug} className="hover:bg-[#0B0E14]/60 transition-colors">
-                      <td className="px-4 py-3">
-                        <Link
-                          href={`/materials/${material.slug}`}
-                          className="font-mono text-sm font-bold text-[#E6EDF3] hover:text-[#E07A1F] transition-colors"
-                        >
-                          {material.name}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3 hidden sm:table-cell">
-                        <span
-                          className="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider"
-                          style={{ color: familyColor, backgroundColor: `${familyColor}18` }}
-                        >
-                          {material.family}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className="font-mono text-sm font-semibold text-[#E6EDF3]">
-                          {formatPriceShort(price)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span
-                          className="font-mono text-sm font-semibold"
-                          style={{ color: changeTextColor(change1d) }}
-                        >
-                          {formatPercent(change1d)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right hidden md:table-cell">
-                        <span
-                          className="font-mono text-xs"
-                          style={{ color: changeTextColor(change7d) }}
-                        >
-                          {formatPercent(change7d)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right hidden md:table-cell">
-                        <span
-                          className="font-mono text-xs"
-                          style={{ color: changeTextColor(change30d) }}
-                        >
-                          {formatPercent(change30d)}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Latest articles */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold text-[#E6EDF3]">Latest Analysis</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {articles.map((article) => (
-              <div
-                key={article.slug}
-                className="flex flex-col gap-3 p-4 rounded-xl bg-[#161B22] border border-[#21262D] hover:border-[#E07A1F]/30 transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="rounded px-2 py-0.5 text-[10px] font-medium bg-[#E07A1F]/15 text-[#E07A1F]">
-                    {article.category}
+                </td>
+                <td className="py-4 text-right hidden md:table-cell">
+                  <span className="font-mono text-sm tabular" style={{ color: changeTextColor(change7d) }}>
+                    {formatPercent(change7d)}
                   </span>
-                  <span className="text-[10px] text-[#8B949E]">{formatDate(article.date)}</span>
-                </div>
-                <h3 className="text-sm font-semibold text-[#E6EDF3] leading-snug">
+                </td>
+                <td className="py-4 text-right hidden md:table-cell">
+                  <span className="font-mono text-sm tabular" style={{ color: changeTextColor(change30d) }}>
+                    {formatPercent(change30d)}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      {/* Latest analysis — editorial list */}
+      <section className="mx-auto max-w-[1120px] px-8 pb-24">
+        <div className="mb-6">
+          <p className="text-xs font-sans font-medium uppercase tracking-[0.08em] text-ink-faint mb-1">
+            LATEST ANALYSIS
+          </p>
+          <h2
+            className="font-serif font-semibold text-ink"
+            style={{ fontSize: '28px', letterSpacing: '-0.01em' }}
+          >
+            Research &amp; commentary
+          </h2>
+        </div>
+        <div className="border-t border-line">
+          {articles.map((article) => (
+            <article key={article.slug} className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-8 py-6 border-b border-line">
+              <div className="sm:w-32 shrink-0">
+                <p className="text-xs text-ink-faint">{formatDate(article.date)}</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.06em] text-ink-faint mt-1">{article.category}</p>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-serif text-lg font-semibold text-ink leading-snug mb-2" style={{ letterSpacing: '-0.01em' }}>
                   {article.title}
                 </h3>
-                <p className="text-xs text-[#8B949E] leading-relaxed line-clamp-3">
+                <p className="text-sm text-ink-muted leading-relaxed line-clamp-2 mb-3">
                   {article.excerpt}
                 </p>
                 {article.materialSlug && (
                   <Link
                     href={`/materials/${article.materialSlug}`}
-                    className="mt-auto text-xs font-medium text-[#E07A1F] hover:underline"
+                    className="text-xs text-ink-muted hover:text-ink transition-colors duration-150 underline-offset-2 hover:underline"
                   >
-                    View {article.materialSlug.toUpperCase().replace('-', ' ')} →
+                    View {article.materialSlug.toUpperCase().replace('-', ' ')}
                   </Link>
                 )}
               </div>
-            ))}
-          </div>
-        </section>
+            </article>
+          ))}
+        </div>
+      </section>
 
-        {/* CTA strip */}
-        <section className="rounded-xl border border-[#E07A1F]/20 bg-[#E07A1F]/5 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* CTA strip */}
+      <section className="border-t border-line">
+        <div className="mx-auto max-w-[1120px] px-8 py-16 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
-            <h2 className="text-base font-semibold text-[#E6EDF3]">
+            <h2 className="font-serif font-semibold text-ink text-xl mb-1" style={{ letterSpacing: '-0.01em' }}>
               Calculate your pellet cost savings
             </h2>
-            <p className="text-sm text-[#8B949E] mt-0.5">
+            <p className="text-sm text-ink-muted">
               See how much you save switching from filament to Pollen AM open pellet printing.
             </p>
           </div>
           <Link
             href="/calculator"
-            className="shrink-0 rounded-lg bg-[#E07A1F] hover:bg-[#C96E1A] px-5 py-2.5 text-sm font-semibold text-white transition-colors duration-150"
+            className="shrink-0 bg-ink text-bg px-5 py-3 text-sm font-medium hover:bg-black transition-colors duration-150"
           >
-            Open Calculator →
+            Open Calculator
           </Link>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
